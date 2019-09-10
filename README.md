@@ -7,7 +7,7 @@
 ### Database Overview
 
 The main database consists of ten relationaly linked tables
-
+![alt text](https://github.com/afaranda/DEG_Overlap_Analysis_System/DEG_Overlap_ER_Diagram.png "ER Diagram")
 **EXPERIMENT**
 
    |Column|Description|
