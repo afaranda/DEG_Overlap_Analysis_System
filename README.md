@@ -15,8 +15,10 @@ The main database consists of ten relationaly linked tables
    | id | The unique integer identifying this experiment |
    | lab | The lab where this experiment was conducted |
    | title | The descriptive title of this experiment |
-   | repository | The external database where data from this experiment is stored |
-   | external_accession | The unique identifier assigned to this experiment by the repository | 
+   | repository | The external database where data 
+   from this experiment is stored |
+   | external_accession | The unique identifier assigned 
+   to this experiment by the repository | 
 
    
 **SAMPLE**
