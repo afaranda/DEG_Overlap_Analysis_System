@@ -16,14 +16,22 @@ The main database consists of ten relationaly linked tables
    | lab | The lab where this experiment was conducted |
    | title | The descriptive title of this experiment |
    | repository | The external database where data from this experiment is stored |
-   | external_accession | The unique identifier assigned to this experiment by the repository | 
+   | external_accession | Unique identifier assigned to this experiment by the repository |
+   | organism | The organism used in this experiment |
+   | proc_method | Description of the method used to process and analyze all samples in this experiment |
 
    
 **SAMPLE**
 
    |Column|Description|
    |-----|-----------|
-
+   | experiment_id | The unique integer id of the experiment this sample is a part of |
+   | label | The alphanumeric label of this sample, that uniquely identifies it within an experiment |
+   | external_accession | Unique identifier assigned to this sample by the external repository |
+   | short_name | Name used to represent this sample in downstream analysis (may be label) |
+   | platform | The experimental platform used to analyse this sample |
+   | proc_batch | The batch of samples that this sample was processed with |
+   
 **SAMPLE\_CAT\_ATR**
 
    |Column|Description|
