@@ -306,6 +306,20 @@ load_pairwise:BEGIN
         IF (SELECT SUM(Check_sum) FROM vw_foreign_key_check) = 0
         THEN IF gene_id_target = 'symbol' 
             THEN
+                -- Insert Missing Symbols into GENE
+                INSERT INTO GENE (
+                    symbol, 
+                    external_id, 
+                    external_id_source, 
+                    description
+                ) SELECT DISTINCT 
+                    gene_id, 
+                    "Unmapped" AS external_id,
+                    "Unmapped" AS external_id_source,
+                    NULL AS description
+                FROM stg_PAIRWISE_RESULT AS a 
+                WHERE NOT a.gene_id IN (SELECT symbol FROM GENE);
+                
                 -- Load pairwise contrasts, match on gene symbol
                 -- DELETE FROM stg_PAIRWISE_RESULT 
                 -- WHERE NOT gene_id IN (SELECT DISTINCT symbol FROM GENE);
@@ -345,6 +359,19 @@ load_pairwise:BEGIN
                 CALL measurement_nogene('symbol');
                 
             ELSEIF gene_id_target = 'external_id' THEN
+				-- insert missing external_id's into gene
+				INSERT INTO GENE (
+                    symbol, 
+                    external_id, 
+                    external_id_source, 
+                    description
+                ) SELECT DISTINCT 
+                    "Unmapped" AS symbol, 
+                     gene_id,
+                    "Unmapped" AS external_id_source,
+                    NULL AS description
+                FROM stg_PAIRWISE_RESULT AS a 
+                WHERE NOT a.gene_id IN (SELECT external_id FROM GENE);
                 -- Load pairwise contrasts, match on external identifier
                 -- DELETE FROM stg_PAIRWISE_RESULT 
                 -- WHERE NOT gene_id IN (SELECT DISTINCT external_id FROM GENE);
