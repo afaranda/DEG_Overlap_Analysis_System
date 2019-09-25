@@ -39,7 +39,7 @@ etl_load_data<-function(
 ){
   fn<-paste(loaddir, prefix, "_", table_name, "_etl.txt", sep="")
   write.table(
-    df, file=fn, row.names = F, col.names = F, quot = T, sep=","
+    df, file=fn, row.names = F, col.names = F, quote = T, sep=","
   )  
   
   
@@ -90,14 +90,12 @@ etl_load_gtf_table<-function(
   )
   dbSendQuery(con, query)
   
-  return(gtf)
+  etl_load_data(
+    df = gtf,
+    con = con, 
+    table_name = gtf_table_name 
+  )
 }
-# etl_load_data(
-#   df=etl_load_gtf_table(gtfPath = gtfp), 
-#   con=cnx,
-#   table_name = "ENSMUS_96_GTF", 
-#   prefix=""
-# )
 
 ###############################################################################
 # Function: etl_build_gene_table_ens                                          #
@@ -140,6 +138,7 @@ etl_build_gene_table_ens<-function(
     rs<-dbSendQuery(con, query)
     gn<-dbFetch(rs, n=-1)
     
+    print(paste("Number of 1 to 1 genes:", nrow(gn)))
     # Fetch Descriptions from Ensembl via biomaRt for genes in "gn"
     an<-getBM(
       attributes = attr,
@@ -150,6 +149,7 @@ etl_build_gene_table_ens<-function(
         dataset = "mmusculus_gene_ensembl"
       )
     )
+    print(paste("Number of genes retrieved from biomaRt:", nrow(an)))
     
     # Merge Query genes, fix column headers
     df<-merge(
@@ -158,8 +158,11 @@ etl_build_gene_table_ens<-function(
       by.x=ifelse(is.numeric(idCol), names(gn)[idCol], idCol),
       by.y='ensembl_gene_id'
     )
+    print(paste("Rows in df after merge:", nrow(df)))
+    
     # Filter for genes where the MGI symbol matches the gtf gene_name
     df<-df[df$gene_name == df$mgi_symbol, ]
+    print(paste("Rows in df after filtering symbols:", nrow(df)))
     
     # Update Column Names, add "external source"
     ex_id<-ifelse(is.numeric(idCol), names(gn)[idCol], idCol)
@@ -171,15 +174,101 @@ etl_build_gene_table_ens<-function(
     # Setup 'df' for loading
     cols<-c('symbol', 'external_id', 'external_id_source', 'description')
     df<-df[,cols]
-    return(df)
+    etl_load_data(
+      df = df,
+      con = con,
+      table_name = "GENE"
+    )
   }
 }
-# etl_load_data(
-#   df = etl_build_gene_table_ens(con=cnx),
-#   con = cnx,
-#   table_name = "GENE"
-# )
-
+###############################################################################
+# Function: etl_load_gene_table_mgi                                           #
+#   Transfer gene information from an mgi marker file into the table 'GENES'. #
+#                                                                             #
+###############################################################################
+etl_load_gene_table_mgi <- function(
+  con,                                        # the database connection to use
+  mgi_file = "MGI_Gene_Model_Coord.rpt",      # Name of the data file to load
+  mgi_table_name = "mgi",                     # Name of the table to load into
+  idCol = 'MGI_accession_id',                 # Column with unique identifier
+  syCol = 'marker_symbol',                    # Column with unique gene symbols
+  dsCol = 'marker_name',                      # Column with descriptive name
+  colType = 'VARCHAR(500)'                    # Column type for fields in MySQL
+){
+  df<-read.table(
+    file=mgi_file, header=T, sep="\t",
+    quote="", comment.char = ""
+  )
+  print(nrow(df))
+  # Make column headers sql compliant
+  names(df)<-gsub("\\.", "_", names(df))
+  
+  # Verify that at least one identifying column is
+  if(
+      !(
+        length(unique(df[,idCol])) == nrow(df) |
+        length(unique(df[,syCol])) == nrow(df)
+      ) 
+  ){
+    print("Table must provide either Unique Identifiers or Unique Symbols")
+    return(NULL)
+  }
+  if(any(names(df) == "id")){
+    print("The header 'id' is reserved; please edit this header in the file")
+    return(NULL)
+  }
+  
+  
+  # Create table on the database that matches the MGI File
+  tblCols<-paste(
+    paste(names(df), colType),  collapse =", "
+  )
+  create_statement<-paste(
+    "(id INT NOT NULL AUTO_INCREMENT,", tblCols, ", PRIMARY KEY (id));"
+  )
+  query<-paste(
+    "CREATE TABLE IF NOT EXISTS", mgi_table_name, 
+    create_statement
+  )
+  dbSendQuery(con, query)
+  
+  # Push the MGI File into the database
+  etl_load_data(
+    df=df,
+    con=con,
+    table_name = mgi_table_name
+  )
+  
+  # Update Column Names for downstream filtering
+  names(df)[grep(paste("^",idCol,"$", sep=""), names(df))]<-"idCol"
+  names(df)[grep(paste("^",syCol,"$", sep=""), names(df))]<-"syCol"
+  names(df)[grep(paste("^",dsCol,"$", sep=""), names(df))]<-"dsCol"
+  
+  
+  # Remove genes without 1 to 1 correspondence between MGI symbol and ID
+  df<-df  %>% 
+    dplyr::select(idCol, syCol, dsCol)
+  
+  dg <- as.data.frame(
+    inner_join(df, df, by = "syCol") %>% 
+      group_by(idCol.x) %>%
+      filter(n() < 2) %>%
+      dplyr::select(idCol=idCol.x, syCol, dsCol=dsCol.x)
+  )
+  
+  # Prepare Dataframe for loading into the database
+  names(dg)[grep("idCol", names(dg))]<-"external_id"
+  names(dg)[grep("syCol", names(dg))]<-"symbol"
+  names(dg)[grep("dsCol", names(dg))]<-"description"
+  dg$external_id_source<-"MGI"
+  
+  print(names(dg))
+  etl_load_data(
+    df=dg,
+    con=con, 
+    table_name = "GENE"
+  )
+}
 
 ###############################################################################
 # Function: etl_load_pairwise_tables                                          #
