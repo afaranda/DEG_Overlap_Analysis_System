@@ -1,0 +1,164 @@
+
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ################################################################################
+> # File: PCO_DNA_Overlap_ETL.R                                                  #
+> # Author: Adam Faranda                                                         #
+> # Created: June 27, 2019                                                       #
+> # Purpose: Template script for loading experiment data into the MySQL database #
+> #                                                                              #
+> ################################################################################
+> # Setup Workspace
+> rm(list=ls()) # Clear any pre-existing environment data
+> options(echo=F)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:reshape2’:
+
+    dcast, melt
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+Loading required package: GenomicRanges
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:dplyr’:
+
+    combine, intersect, setdiff, union
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which, which.max, which.min
+
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:data.table’:
+
+    first, second
+
+The following objects are masked from ‘package:dplyr’:
+
+    first, rename
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+
+Attaching package: ‘IRanges’
+
+The following object is masked from ‘package:data.table’:
+
+    shift
+
+The following objects are masked from ‘package:dplyr’:
+
+    collapse, desc, slice
+
+Loading required package: GenomeInfoDb
+[1] "RPKM Filtering Cols: S1_RPKM S2_RPKM S3_RPKM S4_RPKM S5_RPKM S6_RPKM"
+[1] "RPKM Filtering Cols: S1_RPKM S2_RPKM S3_RPKM S7_RPKM S8_RPKM S9_RPKM"
+Using gene_id as id variables
+Using gene_id as id variables
+[1] "All duplicate control values for S1 - S3 are identical: TRUE"
+[1] "Maximum Absolute Foldchange in this dataset is: 11.94761215245"
+[1] "Replacing Inf with: 1000"
+[1] "Rows in contrast WT0vsWT24 : 14594 Unique gene_id: 14594"
+[1] "Rows in contrast WT0vsWT48 : 14675 Unique gene_id: 14675"
+[1] "Rows for this sample S1 : 14870 Unique gene_id: 14870"
+[1] "Rows for this sample S2 : 14870 Unique gene_id: 14870"
+[1] "Rows for this sample S3 : 14870 Unique gene_id: 14870"
+[1] "Rows for this sample S4 : 14594 Unique gene_id: 14594"
+[1] "Rows for this sample S5 : 14594 Unique gene_id: 14594"
+[1] "Rows for this sample S6 : 14594 Unique gene_id: 14594"
+[1] "Rows for this sample S7 : 14675 Unique gene_id: 14675"
+[1] "Rows for this sample S8 : 14675 Unique gene_id: 14675"
+[1] "Rows for this sample S9 : 14675 Unique gene_id: 14675"
+<MySQLResult:1918986339,0,0>
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_EXPERIMENT_etl.txt' INTO TABLE stg_EXPERIMENT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( lab, title, repository, external_accession, organism, proc_method ) SET id = NULL;"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_etl.txt' INTO TABLE stg_SAMPLE FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, external_accession, platform, proc_batch );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_NUM_ATR_etl.txt' INTO TABLE stg_SAMPLE_NUM_ATR FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, attr_name, attr_value, attr_def, attr_units );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_CAT_ATR_etl.txt' INTO TABLE stg_SAMPLE_CAT_ATR FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, attr_name, attr_value, attr_def );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_GROUP_etl.txt' INTO TABLE stg_GROUP FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, title, criteria );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_GROUP_ASSIGN_etl.txt' INTO TABLE stg_GROUP_ASSIGN FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, group_label );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_CONTRAST_etl.txt' INTO TABLE stg_CONTRAST FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, title, group_1_label, group_2_label );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_PAIRWISE_RESULT_etl.txt' INTO TABLE stg_PAIRWISE_RESULT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( contrast_label, gene_id, group_1_avg, group_2_avg, logFC, p_value, fdr );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_MEASUREMENT_etl.txt' INTO TABLE stg_SAMPLE_MEASUREMENT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( gene_id, sample_label, measurement, meas_type );"
+[1] TRUE
+<MySQLResult:2,0,13>
+              @lr
+1 load successful
+[1] "Number of genes dropped from pairwise results"
+  COUNT(*)
+1        0
+[1] "Number of genes dropped from sample measurements"
+  COUNT(*)
+1        0
+[1] "Number of records loaded into each table for this transaction"
+          Table_Name Records_Staged Records_Loaded
+1         EXPERIMENT              1              1
+2             SAMPLE              9              9
+3     SAMPLE_CAT_ATR              9              9
+4     SAMPLE_NUM_ATR             18             18
+5              GROUP              3              3
+6       GROUP_ASSIGN              9              9
+7           CONTRAST              2              2
+8    PAIRWISE_RESULT          29269          29269
+9 SAMPLE_MEASUREMENT         132417         132417
+> proc.time()
+   user  system elapsed 
+ 14.889   0.390  96.803 

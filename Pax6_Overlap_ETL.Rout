@@ -1,0 +1,149 @@
+
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ################################################################################
+> # File: Pax6_Overlap_ETL.R		    			                                       #
+> # Author: Adam Faranda			                                     				       #
+> # Created: June 27, 2019						                                           #
+> # Purpose:  #
+> #                                                                              #
+> ################################################################################
+> # Setup Workspace
+> rm(list=ls()) # Clear any pre-existing environment data
+> options(echo=F)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:reshape2’:
+
+    dcast, melt
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+Loading required package: GenomicRanges
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:dplyr’:
+
+    combine, intersect, setdiff, union
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which, which.max, which.min
+
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:data.table’:
+
+    first, second
+
+The following objects are masked from ‘package:dplyr’:
+
+    first, rename
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+
+Attaching package: ‘IRanges’
+
+The following object is masked from ‘package:data.table’:
+
+    shift
+
+The following objects are masked from ‘package:dplyr’:
+
+    collapse, desc, slice
+
+Loading required package: GenomeInfoDb
+[1] "Rows in  1 : 14108 Unique gene_id:  14108"
+[1] "Rows in  2 : 10618 Unique gene_id:  10618"
+[1] "Rows in  3 : 13018 Unique gene_id:  13018"
+<MySQLResult:942681648,0,0>
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_EXPERIMENT_etl.txt' INTO TABLE stg_EXPERIMENT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( lab, title, repository, external_accession, organism, proc_method ) SET id = NULL;"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_etl.txt' INTO TABLE stg_SAMPLE FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, external_accession, platform, proc_batch );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_NUM_ATR_etl.txt' INTO TABLE stg_SAMPLE_NUM_ATR FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, attr_name, attr_value, attr_def, attr_units );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_CAT_ATR_etl.txt' INTO TABLE stg_SAMPLE_CAT_ATR FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, attr_name, attr_value, attr_def );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_GROUP_etl.txt' INTO TABLE stg_GROUP FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, title, criteria );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_GROUP_ASSIGN_etl.txt' INTO TABLE stg_GROUP_ASSIGN FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, group_label );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_CONTRAST_etl.txt' INTO TABLE stg_CONTRAST FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, title, group_1_label, group_2_label );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_PAIRWISE_RESULT_etl.txt' INTO TABLE stg_PAIRWISE_RESULT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( contrast_label, gene_id, group_1_avg, group_2_avg, logFC, p_value, fdr );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_MEASUREMENT_etl.txt' INTO TABLE stg_SAMPLE_MEASUREMENT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, gene_id, measurement, meas_type );"
+[1] TRUE
+<MySQLResult:343474,0,13>
+              @lr
+1 load successful
+[1] "Number of genes dropped from pairwise results"
+  COUNT(*)
+1        0
+[1] "Number of genes dropped from sample measurements"
+  COUNT(*)
+1        0
+[1] "Number of records loaded into each table for this transaction"
+          Table_Name Records_Staged Records_Loaded
+1         EXPERIMENT              1              1
+2             SAMPLE              6              6
+3     SAMPLE_CAT_ATR             12             12
+4     SAMPLE_NUM_ATR              6              6
+5              GROUP              6              6
+6       GROUP_ASSIGN              6              6
+7           CONTRAST              3              3
+8    PAIRWISE_RESULT          37744          37744
+9 SAMPLE_MEASUREMENT              0              0
+> proc.time()
+   user  system elapsed 
+ 17.334   0.696  84.160 

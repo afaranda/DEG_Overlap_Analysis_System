@@ -1,0 +1,215 @@
+
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+[Previously saved workspace restored]
+
+> ################################################################################
+> # File: GSE29402_Overlap_ETL.R                                                 #
+> # Author: Adam Faranda                                                         #
+> # Created: Sept 24, 2019                                                       #
+> # Purpose:  load data from GSE29402 experiment data into the MySQL database    #
+> #                                                                              #
+> ################################################################################
+> # Setup Workspace
+> rm(list=ls()) # Clear any pre-existing environment data
+> options(echo=F)
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Loading required package: Biobase
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:dplyr’:
+
+    combine, intersect, setdiff, union
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which, which.max, which.min
+
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+Setting options('download.file.method.GEOquery'='auto')
+Setting options('GEOquery.inmemory.gpl'=FALSE)
+
+Attaching package: ‘limma’
+
+The following object is masked from ‘package:BiocGenerics’:
+
+    plotMA
+
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:reshape2’:
+
+    dcast, melt
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+Loading required package: GenomicRanges
+Loading required package: stats4
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:data.table’:
+
+    first, second
+
+The following objects are masked from ‘package:dplyr’:
+
+    first, rename
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+
+Attaching package: ‘IRanges’
+
+The following object is masked from ‘package:data.table’:
+
+    shift
+
+The following objects are masked from ‘package:dplyr’:
+
+    collapse, desc, slice
+
+Loading required package: GenomeInfoDb
+Parsed with column specification:
+cols(
+  ID_REF = col_character(),
+  GSM724093 = col_double(),
+  GSM724094 = col_double(),
+  GSM724095 = col_double(),
+  GSM724096 = col_double(),
+  GSM724097 = col_double(),
+  GSM724098 = col_double()
+)
+Using locally cached version of GPL570 found here:
+/home/adam/Desktop/DEG_Overlap_Analysis_System/data_files/GPL570.soft 
+Warning: 62 parsing failures.
+  row     col           expected    actual         file
+54614 SPOT_ID 1/0/T/F/TRUE/FALSE --Control literal data
+54615 SPOT_ID 1/0/T/F/TRUE/FALSE --Control literal data
+54616 SPOT_ID 1/0/T/F/TRUE/FALSE --Control literal data
+54617 SPOT_ID 1/0/T/F/TRUE/FALSE --Control literal data
+54618 SPOT_ID 1/0/T/F/TRUE/FALSE --Control literal data
+..... ....... .................. ......... ............
+See problems(...) for more details.
+
+        GSM724093 GSM724094 GSM724095 GSM724096 GSM724097 GSM724098
+Min.     2.171657  2.208795  2.200436  2.206359  2.158669  2.158109
+1st Qu.  3.694062  3.792296  3.703135  3.726987  3.753889  3.737275
+Median   5.126698  5.120910  5.122557  5.092137  5.122829  5.117570
+Mean     5.633432  5.630403  5.630699  5.621018  5.637391  5.634547
+3rd Qu.  7.234643  7.079042  7.212662  7.156204  7.138006  7.161761
+Max.    14.630012 14.727621 14.636095 14.807331 14.743509 14.785867
+                 ID Gene.Symbol ENTREZ_GENE_ID  AveExpr    logFC      P.Value
+225911_at 225911_at        NPNT         255743 6.752292 5.296796 3.526990e-09
+242907_at 242907_at        GBP2           2634 5.466365 4.859260 5.144703e-09
+213568_at 213568_at        OSR2         116039 7.866385 7.179223 8.713144e-09
+227253_at 227253_at          CP           1356 7.959343 7.764097 2.524044e-08
+204846_at 204846_at          CP           1356 7.757717 7.421366 2.742707e-08
+219795_at 219795_at     SLC6A14          11254 6.913145 7.102371 3.858265e-08
+             adj.P.Val
+225911_at 0.0001406433
+242907_at 0.0001406433
+213568_at 0.0001587971
+227253_at 0.0002999150
+204846_at 0.0002999150
+219795_at 0.0003305259
+[1] "Num Rows in deg before join:  51879 , after join: 51879 With one to one murine homolog: 33878"
+[1] "Maximum Absolute Foldchange in this dataset is: 7.764096579"
+[1] "Replacing Inf with: 1000"
+[1] "Rows in contrast CORvsCNJ : 15174 Unique gene_id: 15174"
+[1] "Rows for this sample GSM724093 : 15174 Unique gene_id: 15174"
+[1] "Rows for this sample GSM724094 : 15174 Unique gene_id: 15174"
+[1] "Rows for this sample GSM724095 : 15174 Unique gene_id: 15174"
+[1] "Rows for this sample GSM724096 : 15174 Unique gene_id: 15174"
+[1] "Rows for this sample GSM724097 : 15174 Unique gene_id: 15174"
+[1] "Rows for this sample GSM724098 : 15174 Unique gene_id: 15174"
+<MySQLResult:1701672302,0,0>
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_EXPERIMENT_etl.txt' INTO TABLE stg_EXPERIMENT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( lab, title, repository, external_accession, organism, proc_method ) SET id = NULL;"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_etl.txt' INTO TABLE stg_SAMPLE FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, external_accession, platform, proc_batch );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_NUM_ATR_etl.txt' INTO TABLE stg_SAMPLE_NUM_ATR FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, attr_name, attr_value, attr_def, attr_units );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_CAT_ATR_etl.txt' INTO TABLE stg_SAMPLE_CAT_ATR FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, attr_name, attr_value, attr_def );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_GROUP_etl.txt' INTO TABLE stg_GROUP FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, title, criteria );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_GROUP_ASSIGN_etl.txt' INTO TABLE stg_GROUP_ASSIGN FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, group_label );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_CONTRAST_etl.txt' INTO TABLE stg_CONTRAST FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( label, title, group_1_label, group_2_label );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_PAIRWISE_RESULT_etl.txt' INTO TABLE stg_PAIRWISE_RESULT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( contrast_label, gene_id, group_1_avg, group_2_avg, logFC, p_value, fdr );"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_stg_SAMPLE_MEASUREMENT_etl.txt' INTO TABLE stg_SAMPLE_MEASUREMENT FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( sample_label, gene_id, measurement, meas_type );"
+[1] TRUE
+<MySQLResult:751995616,0,13>
+              @lr
+1 load successful
+[1] "Number of genes dropped from pairwise results"
+  COUNT(*)
+1        0
+[1] "Number of genes dropped from sample measurements"
+  COUNT(*)
+1        0
+[1] "Number of records loaded into each table for this transaction"
+          Table_Name Records_Staged Records_Loaded
+1         EXPERIMENT              1              1
+2             SAMPLE              6              6
+3     SAMPLE_CAT_ATR             12             12
+4     SAMPLE_NUM_ATR              6              6
+5              GROUP              2              2
+6       GROUP_ASSIGN              6              6
+7           CONTRAST              1              1
+8    PAIRWISE_RESULT          15174          15174
+9 SAMPLE_MEASUREMENT          91044          91044
+> proc.time()
+   user  system elapsed 
+ 17.190   0.385  92.541 

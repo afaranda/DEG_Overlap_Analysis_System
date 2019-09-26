@@ -1,0 +1,156 @@
+
+R version 3.6.1 (2019-07-05) -- "Action of the Toes"
+Copyright (C) 2019 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ###############################################################################
+> # File: Gene_Table_ETL.R                                                      #
+> # Purpose: Populate the database table GENE with gene information extracted   #
+> #          from a GTF file                                                    #
+> # Created: August 10, 2019                                                    #
+> # Author: Adam Pater-Faranda                                                  #
+> ###############################################################################
+> 
+> options(stringsAsFactors = F)
+> source('DEG_Overlap_ETL_Functions.R')
+
+Attaching package: ‘dplyr’
+
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+
+Attaching package: ‘data.table’
+
+The following objects are masked from ‘package:dplyr’:
+
+    between, first, last
+
+Loading required package: GenomicRanges
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:dplyr’:
+
+    combine, intersect, setdiff, union
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which, which.max, which.min
+
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following objects are masked from ‘package:data.table’:
+
+    first, second
+
+The following objects are masked from ‘package:dplyr’:
+
+    first, rename
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+
+Attaching package: ‘IRanges’
+
+The following object is masked from ‘package:data.table’:
+
+    shift
+
+The following objects are masked from ‘package:dplyr’:
+
+    collapse, desc, slice
+
+Loading required package: GenomeInfoDb
+> wd<-getwd()
+> loaddir<-"/var/lib/mysql-files/"  # Directory where "txt" data must be saved
+> library(dplyr)
+> library(data.table)
+> library(DBI)
+> library(RMySQL)
+> library(rtracklayer)
+> library(biomaRt)
+> cnx<-dbConnect(
++   MySQL(), 
++   dbname="DEG_Overlap_Analysis_System", 
++   password="adnaraf7"
++ )
+> 
+> # Example Call to load an ensembl GTF File
+> # gtfp <- "/home/adam/Documents/LTS_Data/Mus_musculus.GRCm38.96.chr.gtf"
+> # etl_load_gtf_table(
+> #   gtfPath = gtfp,
+> #   con=cnx,
+> #   gtf_table_name = "ENSMUS_96_GTF"
+> # )
+> # etl_build_gene_table_ens(con=cnx)
+> 
+> # Load a Marker Table from MGI -- Note
+> mgi_file<-"/home/adam/Desktop/MGI_Gene_Model_Coord.rpt"
+> etl_load_gene_table_mgi(
++   con = cnx,                                  # the database connection to use
++   mgi_file = mgi_file,                        # Name of the data file to load
++   mgi_table_name = "MGI",                     # Name of the table to load into
++   idCol = 'MGI_accession_id',                 # Column with unique identifier
++   syCol = 'marker_symbol',                    # Column with unique gene symbols
++   dsCol = 'marker_name',                      # Column with descriptive name
++   colType = 'VARCHAR(500)'                    # Column type for fields in MySQL
++ )
+[1] 64248
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_MGI_etl.txt' INTO TABLE MGI FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( MGI_accession_id, marker_type, marker_symbol, marker_name, genome_build, Entrez_gene_id, NCBI_gene_chromosome, NCBI_gene_start, NCBI_gene_end, NCBI_gene_strand, Ensembl_gene_id, Ensembl_gene_chromosome, Ensembl_gene_start, Ensembl_gene_end, Ensembl_gene_strand, Stupid );"
+[1] "external_id"        "symbol"             "description"       
+[4] "external_id_source"
+[1] "LOAD DATA INFILE '/var/lib/mysql-files/_GENE_etl.txt' INTO TABLE GENE FIELDS TERMINATED BY ',' OPTIONALLY ENCLOSED BY '\"' ( external_id, symbol, description, external_id_source );"
+[1] TRUE
+> # Note on MGI Columns idCol, syCol, dsCol
+> # In the original file, the names of these columns have a whitespace which
+> # is replaced with an underscore in the above function call.  In the body
+> # of the function, there is a line that changes the column headers after
+> # loading data into a data frame.  The values of idCol, syCol and dsCol
+> 
+> 
+> proc.time()
+   user  system elapsed 
+  8.161   0.325  20.497 
